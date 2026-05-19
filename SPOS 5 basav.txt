@@ -1,0 +1,85 @@
+ref = list("70120304230321201701")
+frames = 3
+
+
+# ---------- FIFO ----------
+def fifo():
+    f, q, faults = [], [], 0
+    print("\nFIFO:")
+
+    for p in ref:
+        if p not in f:
+            faults += 1
+
+            if len(f) < frames:
+                f.append(p)
+                q.append(p)
+
+            else:
+                old = q.pop(0)
+                f[f.index(old)] = p
+                q.append(p)
+
+        print(f)
+
+    print("Faults:", faults)
+
+
+# ---------- LRU ----------
+def lru():
+    f, recent, faults = [], [], 0
+    print("\nLRU:")
+
+    for p in ref:
+        if p not in f:
+            faults += 1
+
+            if len(f) < frames:
+                f.append(p)
+
+            else:
+                l = min(f, key=lambda x: recent.index(x))
+                f[f.index(l)] = p
+                recent.remove(l)
+
+        if p in recent:
+            recent.remove(p)
+
+        recent.append(p)
+        print(f)
+
+    print("Faults:", faults)
+
+
+# ---------- OPTIMAL ----------
+def optimal():
+    f, faults = [], 0
+    print("\nOptimal:")
+
+    for i, p in enumerate(ref):
+
+        if p not in f:
+            faults += 1
+
+            if len(f) < frames:
+                f.append(p)
+
+            else:
+                idx = max(
+                    range(len(f)),
+                    key=lambda j:
+                    ref[i+1:].index(f[j]) if f[j] in ref[i+1:] else 999
+                )
+
+                f[idx] = p
+
+        print(f)
+
+    print("Faults:", faults)
+
+
+# ---------- RUN ----------
+fifo()
+lru()
+optimal()
+

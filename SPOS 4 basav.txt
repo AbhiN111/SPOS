@@ -1,0 +1,86 @@
+# Process Data
+p = ['P1', 'P2', 'P3', 'P4']
+at = [0, 1, 2, 3]
+bt = [5, 3, 8, 6]
+pr = [2, 1, 4, 3]
+n = 4
+
+
+# ---------- FCFS ----------
+def fcfs():
+    t = 0
+    print("\nFCFS:")
+
+    for i in range(n):
+        t = max(t, at[i])
+        print(p[i], "->", t, "-", t + bt[i])
+        t += bt[i]
+
+
+# ---------- SJF Preemptive (SRTF) ----------
+def sjf():
+    rt = bt[:]
+    t = 0
+    print("\nSJF (Preemptive):")
+
+    while any(rt):
+        idx = -1
+        m = 999
+
+        for i in range(n):
+            if at[i] <= t and rt[i] > 0 and rt[i] < m:
+                m = rt[i]
+                idx = i
+
+        if idx != -1:
+            print(p[idx], end=" ")
+            rt[idx] -= 1
+            t += 1
+
+    print()
+
+
+# ---------- Priority Non-Preemptive ----------
+def priority():
+    done = [0] * n
+    t = 0
+    print("\nPriority (Non-Preemptive):")
+
+    for _ in range(n):
+        idx = -1
+        m = 999
+
+        for i in range(n):
+            if at[i] <= t and not done[i] and pr[i] < m:
+                m = pr[i]
+                idx = i
+
+        print(p[idx], "->", t, "-", t + bt[idx])
+        t += bt[idx]
+        done[idx] = 1
+
+
+# ---------- Round Robin ----------
+def rr(q=3):
+    rt = bt[:]
+    t = 0
+    print("\nRound Robin:")
+
+    while any(rt):
+
+        for i in range(n):
+
+            if at[i] <= t and rt[i] > 0:
+
+                ex = min(q, rt[i])
+
+                print(p[i], "->", t, "-", t + ex)
+
+                t += ex
+                rt[i] -= ex
+
+# ---------- RUN ALL ----------
+fcfs()
+sjf()
+priority()
+rr(3)

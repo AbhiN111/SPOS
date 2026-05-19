@@ -1,0 +1,63 @@
+import threading
+import time
+import random
+
+# ---------------- BUFFER ----------------
+BUFFER_SIZE = 5
+buffer = []
+
+# ---------------- SYNCHRONIZATION TOOLS ----------------
+mutex = threading.Lock()                 # for mutual exclusion
+empty = threading.Semaphore(BUFFER_SIZE) # counts empty slots
+full = threading.Semaphore(0)            # counts filled slots
+
+
+# ---------------- PRODUCER ----------------
+def producer():
+    item = 1
+
+    while item <= 10:   # produce 10 items for demo
+        empty.acquire()   # wait if buffer is full
+        mutex.acquire()   # lock buffer
+
+        # critical section
+        buffer.append(item)
+        print(f"Producer produced: {item} | Buffer: {buffer}")
+        item += 1
+
+        mutex.release()   # unlock buffer
+        full.release()    # increase full slots
+
+        time.sleep(random.random())
+
+
+# ---------------- CONSUMER ----------------
+def consumer():
+    consumed = 0
+
+    while consumed < 10:
+        full.acquire()    # wait if buffer is empty
+        mutex.acquire()   # lock buffer
+
+        # critical section
+        item = buffer.pop(0)
+        print(f"Consumer consumed: {item} | Buffer: {buffer}")
+        consumed += 1
+
+        mutex.release()   # unlock buffer
+        empty.release()   # increase empty slots
+
+        time.sleep(random.random())
+
+
+# ---------------- MAIN ----------------
+p = threading.Thread(target=producer)
+c = threading.Thread(target=consumer)
+
+p.start()
+c.start()
+
+p.join()
+c.join()
+
+print("\nProduction and Consumption completed.")

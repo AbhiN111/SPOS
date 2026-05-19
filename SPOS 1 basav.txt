@@ -1,0 +1,73 @@
+OPTAB={
+    "READ": "IS01",
+    "ADD" : "IS02",
+    "MOVER" : "IS03",
+    "MOVEM" :"IS04",
+    "PRINT" : "IS05",
+    "STOP" : "IS06"
+}
+
+SYMTAB={}
+LC=[]
+IC=[]
+
+def pass1(prog):
+    global LC
+    
+    for line in prog:
+        p=line.split()
+        
+        if not p:
+            continue
+        
+        if p[0]== "START":
+            LC=int(p[1])
+            IC.append(("AD01","START",LC))
+            
+        elif p[0]=="END":
+            IC.append(("AD03","END"))
+            
+        elif len(p) > 2 and p[1] in ["DC","DS"]:
+            SYMTAB [p[0]]=LC
+            IC.append(("AD02",p[0],p[1],p[2]))
+            
+            if p[1]=="DS":
+                LC+=int (p[2])
+            else:
+                LC +=1
+                
+        elif p[0]  in OPTAB:
+            IC.append((OPTAB[p[0]],*p[1:]))
+            
+        else:
+            SYMTAB[p[0]]=LC
+            
+def pass2():
+    print("Machine code:")
+    for i in IC:
+        print(*(SYMTAB.get(x, x) for x in i))
+            
+prog = [
+    "START 100",
+    "READ A",
+    "MOVER AREG A",
+    "ADD BREG B",
+    "MOVEM AREG RESULT",
+    "PRINT RESULT",
+    "STOP",
+    "A DC 5",
+    "B DC 10",
+    "RESULT DS 1",
+    "END"
+]
+
+pass1(prog)
+print("Intermediate code: ") 
+for i in IC:
+    print (i)
+    
+print("SYMBOL TABLE")
+for k, v in SYMTAB.items():
+    print(k, "->", v)
+    
+pass2()
